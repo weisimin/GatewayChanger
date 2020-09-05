@@ -37,10 +37,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PacketDotNet">
-      <HintPath>C:\Users\DELL\Desktop\SHARPCAP\Release\PacketDotNet.dll</HintPath>
+      <HintPath>.\SHARPCAP\Release\PacketDotNet.dll</HintPath>
     </Reference>
     <Reference Include="SharpPcap">
-      <HintPath>C:\Users\DELL\Desktop\SHARPCAP\Release\SharpPcap.dll</HintPath>
+      <HintPath>.\SHARPCAP\Release\SharpPcap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -84,12 +84,26 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="SHARPCAP\Release\SharpPcap.dll.config" />
     <None Include="SharpPcap.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Libs\trunk\ToolLibs\ToolLibs\ToolLibs.csproj">
+      <Project>{b7ced633-a03f-4814-8c4b-e91aafadd3da}</Project>
+      <Name>ToolLibs</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SHARPCAP\Release\PacketDotNet.dll" />
+    <Content Include="SHARPCAP\Release\PacketDotNet.xml" />
+    <Content Include="SHARPCAP\Release\SharpPcap.dll" />
+    <Content Include="SHARPCAP\Release\SharpPcap.xml" />
+    <Content Include="SHARPCAP\WinPcap_4_1_3.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

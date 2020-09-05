@@ -12,6 +12,7 @@ using SharpPcap;
 using PacketDotNet;
 using SharpPcap.LibPcap;
 using System.Threading;
+using System.Net;
 
 namespace GatewayChanger
 {
@@ -46,13 +47,14 @@ namespace GatewayChanger
         {
             autoadd = cb_autoadd.Checked;
         }
-        bool autochange = false;
+        bool autochange = true;
         private void cb_autochange_CheckedChanged(object sender, EventArgs e)
         {
             autochange = cb_autochange.Checked;
         }
 
         Dictionary<string, string> RouteTable = new Dictionary<string, string>();
+        CookieCollection cc = new CookieCollection();
         private void device_OnPacketArrival(object sender, CaptureEventArgs e)
         {
             ////解析出基本包  
@@ -73,10 +75,27 @@ namespace GatewayChanger
                 String ToAddress = ((IpPacket)ipPacket).SourceAddress.ToString();
                 String Message = "源地址" + ((IpPacket)ipPacket).SourceAddress.ToString()
                      + " ,目的地址" + ((IpPacket)ipPacket).DestinationAddress.ToString();
-                Console.WriteLine(Message);
-                if (RouteTable.ContainsKey(ToAddress))
+                NetFramework.Console.Write(Message);
+                if (ToAddress.Contains(".") == false || ToAddress.StartsWith("192") == true)
                 {
+                    return;
+                }
+                String URL = "https://www.ip.cn/api/index?ip=" + ToAddress + "&type=1";
 
+                String IPCheck = NetFramework.Util_WEB.OpenUrl(URL, "", "", "GET", cc);
+                if (
+
+                    (IPCheck.Contains("美国") || IPCheck.Contains("香港") || IPCheck.Contains("日本") || IPCheck.Contains("台湾") || IPCheck.Contains("新加坡") || IPCheck.Contains("加拿大"))
+                    && (IPCheck != tb_excuteip.Text)
+
+                    )
+                {
+                    if (RouteTable.ContainsKey(ToAddress))
+                    {
+                        String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_serverip.Text + " ";
+                        NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                        RouteTable.Add(ToAddress, "run");
+                    }
                 }
 
             }
@@ -158,7 +177,7 @@ namespace GatewayChanger
                 foreach (PcapDevice device in SharpPcap.CaptureDeviceList.Instance)
                 {
                     ////分别启动监听，指定包的处理函数  
-                    //device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival);
+                    device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival);
                     device.Open(DeviceMode.Normal, 1000);
                     device.Capture(500);
                     //device.StartCapture();  
@@ -174,7 +193,7 @@ namespace GatewayChanger
         /// </summary>  
         /// <param name="sender"></param>  
         /// <param name="e"></param>  
-      
+
 
         public void StopAll()
         {
@@ -190,4 +209,6 @@ namespace GatewayChanger
             _thread.Abort();
         }
     }
+
+    //https://www.ip.cn/api/index?ip=45.119.126.225&type=1
 }
