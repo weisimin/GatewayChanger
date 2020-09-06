@@ -31,6 +31,29 @@ namespace GatewayChanger
             {
                 Runing = !Runing;
                 btn_switch.Text = "运行中";
+
+                if (autoadd == true)
+                {
+                    String CMDParammter = " delete 0.0.0.0 ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                    CMDParammter = "ADD 192.168.6.0 MASK 255.255.255.0 " + tb_localgateway.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                    CMDParammter = "ADD 192.168.1.0 MASK 255.255.255.0 " + tb_localgateway.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                    CMDParammter = "ADD 202.96.128.86 MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                    CMDParammter = "ADD " + tb_excuteip.Text + " MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                }
+                if (autochange == true)
+                {
+
+                    String CMDParammter = "ADD 8.8.8.8 MASK 255.255.255.255 " + tb_serverip.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                    CMDParammter = "ADD 114.114.114.114 MASK 255.255.255.255 " + tb_serverip.Text + " ";
+                    NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                }
+
                 WinCapHelper.WinCapInstance.Listen(device_OnPacketArrival);
             }
             else
@@ -64,44 +87,107 @@ namespace GatewayChanger
             //var ethernetPacket = PacketDotNet.EthernetPacket.GetEncapsulated(packet);  
             //var internetLinkPacket = PacketDotNet.InternetLinkLayerPacket.Parse(packet.BytesHighPerformance.Bytes);  
             //var internetPacket = PacketDotNet.InternetPacket.Parse(packet.BytesHighPerformance.Bytes); 
-            //var sessionPacket = PacketDotNet.SessionPacket.Parse(packet.BytesHighPerformance.Bytes);  
-            //var appPacket = PacketDotNet.ApplicationPacket.Parse(packet.BytesHighPerformance.Bytes);  
-            //var pppoePacket = PacketDotNet.PPPoEPacket.Parse(packet.BytesHighPerformance.Bytes); 
-            //var arpPacket = PacketDotNet.ARPPacket.GetEncapsulated(packet);  
-            var ipPacket = packet.Extract(typeof(IpPacket));//ip包  
-            if (ipPacket != null)
+            var sessionPacket = packet.Extract(typeof(SessionPacket));//ip包  
+            if (sessionPacket != null)
             {
-                String FromAddress = ((IpPacket)ipPacket).SourceAddress.ToString();
-                String ToAddress = ((IpPacket)ipPacket).SourceAddress.ToString();
-                String Message = "源地址" + ((IpPacket)ipPacket).SourceAddress.ToString()
-                     + " ,目的地址" + ((IpPacket)ipPacket).DestinationAddress.ToString();
-                NetFramework.Console.Write(Message);
-                if (ToAddress.Contains(".") == false || ToAddress.StartsWith("192") == true)
-                {
-                    return;
-                }
-                String URL = "https://www.ip.cn/api/index?ip=" + ToAddress + "&type=1";
 
-                String IPCheck = NetFramework.Util_WEB.OpenUrl(URL, "", "", "GET", cc);
-                if (
-
-                    (IPCheck.Contains("美国") || IPCheck.Contains("香港") || IPCheck.Contains("日本") || IPCheck.Contains("台湾") || IPCheck.Contains("新加坡") || IPCheck.Contains("加拿大"))
-                    && (IPCheck != tb_excuteip.Text)
-
-                    )
-                {
-                    if (RouteTable.ContainsKey(ToAddress))
-                    {
-                        String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_serverip.Text + " ";
-                        NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
-                        RouteTable.Add(ToAddress, "run");
-                    }
-                }
+                //NetFramework.Console.Write("sessionPacket:" + Encoding.ASCII.GetString(((InternetLinkLayerPacket)sessionPacket).));
 
             }
 
-            // var udpPacket = PacketDotNet.UdpPacket.GetEncapsulated(packet);  
-            // var tcpPacket = PacketDotNet.TcpPacket.GetEncapsulated(packet);
+            var internetPacket = packet.Extract(typeof(InternetPacket));//ip包  
+            if (internetPacket != null)
+            {
+
+               // NetFramework.Console.Write("InternetPacket包" + Encoding.ASCII.GetString(((InternetPacket)internetPacket).Header));
+
+            }
+            //var pppoePacket = PacketDotNet.PPPoEPacket.Parse(packet.BytesHighPerformance.Bytes); 
+            var arpPacket = packet.Extract(typeof(ARPPacket));//ip包  
+            if (arpPacket != null)
+            {
+               // NetFramework.Console.Write("arpPacket：" + ((ARPPacket)arpPacket).SenderProtocolAddress.ToString());
+               
+            }
+
+            var ipPacket = packet.Extract(typeof(IpPacket));//ip包  
+            if (ipPacket != null)
+            {
+                 
+                String FromAddress = ((IpPacket)ipPacket).SourceAddress.ToString();
+                String ToAddress = ((IpPacket)ipPacket).DestinationAddress.ToString();
+                String Message = "源地址" + ((IpPacket)ipPacket).SourceAddress.ToString()
+                     + " ,目的地址" + ((IpPacket)ipPacket).DestinationAddress.ToString();
+                // NetFramework.Console.Write("IP:" + Message);
+
+                #region 自动添加
+                if (autochange == true)
+                {
+
+
+                    if (
+
+                    (ToAddress.Contains(".") == true && ToAddress.StartsWith("192") == false)
+                    && (ToAddress != tb_excuteip.Text)
+                    )
+                    {
+                        String URL = "https://www.ip.cn/api/index?ip=" + ToAddress + "&type=1";
+
+                        String IPCheck = NetFramework.Util_WEB.OpenUrl(URL, "", "", "GET", cc);
+
+                        if (
+
+                            (IPCheck.Contains("美国") || IPCheck.Contains("香港") || IPCheck.Contains("日本") || IPCheck.Contains("台湾") || IPCheck.Contains("新加坡") || IPCheck.Contains("加拿大"))
+                            && (IPCheck != tb_excuteip.Text)
+
+                            )
+                        {
+
+                            if (RouteTable.ContainsKey(ToAddress) == false)
+                            {
+                                NetFramework.Console.Write("IP转换" + IPCheck);
+                                String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_serverip.Text + " ";
+                                NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                                RouteTable.Add(ToAddress, "run");
+                            }
+                        }
+                    }//符合条件的
+                }
+                    #endregion
+                    #region 添加到本地
+                    if (autoadd == true)
+                    {
+                        if (ToAddress.Contains("."))
+                        {
+                            if (RouteTable.ContainsKey(ToAddress) == false)
+                            {
+                                NetFramework.Console.Write("添加到路由" + ToAddress);
+                                String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+                                NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                                RouteTable.Add(ToAddress, "run");
+                            }
+                        }
+
+
+
+                    }
+                    #endregion
+                
+            }
+
+            var udpPacket = packet.Extract(typeof(UdpPacket));//ip包
+            if (udpPacket != null)
+            {
+
+                //((UdpPacket)udpPacket).
+                //NetFramework.Console.Write("TCP:" + Encoding.ASCII.GetString(((UdpPacket)udpPacket).Header));
+            }
+            var tcpPacket = packet.Extract(typeof(TcpPacket));//ip包  
+            if (tcpPacket != null)
+            {
+                //((TcpPacket)tcpPacket).HO
+                //NetFramework.Console.Write("UDP:" + Encoding.ASCII.GetString(((TcpPacket)tcpPacket).Header));
+            }
 
             //var tcpp= packet.Extract(typeof(TcpPacket));
             //if (tcpp!=null)
@@ -127,6 +213,17 @@ namespace GatewayChanger
 
 
         }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tb_setserverdefault_Click(object sender, EventArgs e)
+        {
+            String CMDParammter = "ADD 0.0.0.0 MASK 0.0.0.0 " + tb_serverip.Text + " ";
+            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+        }
     }
     public class WinCapHelper
     {
@@ -151,15 +248,8 @@ namespace GatewayChanger
         }
         private Thread _thread;
 
-        /// <summary>  
-        /// when get pocket,callback  
-        /// </summary>  
-        public Action<string> _logAction;
 
-        /// <summary>  
-        /// 过滤条件关键字  
-        /// </summary>  
-        public string filter;
+
 
         private WinCapHelper()
         {
@@ -176,6 +266,10 @@ namespace GatewayChanger
                 ////遍历网卡  
                 foreach (PcapDevice device in SharpPcap.CaptureDeviceList.Instance)
                 {
+                    if (device.Description.ToLower().Contains("oray"))
+                    {
+                        continue;
+                    }
                     ////分别启动监听，指定包的处理函数  
                     device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival);
                     device.Open(DeviceMode.Normal, 1000);
@@ -204,7 +298,6 @@ namespace GatewayChanger
                     Thread.Sleep(500);
                     device.StopCapture();
                 }
-                _logAction("device : " + device.Description + " stoped.\r\n");
             }
             _thread.Abort();
         }

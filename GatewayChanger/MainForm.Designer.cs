@@ -31,12 +31,13 @@
             this.cb_autochange = new System.Windows.Forms.CheckBox();
             this.btn_switch = new System.Windows.Forms.Button();
             this.cb_autoadd = new System.Windows.Forms.CheckBox();
-            this.cb_localgateway = new System.Windows.Forms.TextBox();
+            this.tb_localgateway = new System.Windows.Forms.TextBox();
             this.lbl_localgateway = new System.Windows.Forms.Label();
             this.cb_servergateway = new System.Windows.Forms.Label();
             this.tb_serverip = new System.Windows.Forms.TextBox();
             this.lbl_excuteip = new System.Windows.Forms.Label();
             this.tb_excuteip = new System.Windows.Forms.TextBox();
+            this.tb_setserverdefault = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cb_autochange
@@ -73,13 +74,13 @@
             this.cb_autoadd.UseVisualStyleBackColor = true;
             this.cb_autoadd.CheckedChanged += new System.EventHandler(this.cb_autoadd_CheckedChanged);
             // 
-            // cb_localgateway
+            // tb_localgateway
             // 
-            this.cb_localgateway.Location = new System.Drawing.Point(255, 62);
-            this.cb_localgateway.Name = "cb_localgateway";
-            this.cb_localgateway.Size = new System.Drawing.Size(139, 21);
-            this.cb_localgateway.TabIndex = 4;
-            this.cb_localgateway.Text = "192.168.6.254";
+            this.tb_localgateway.Location = new System.Drawing.Point(255, 62);
+            this.tb_localgateway.Name = "tb_localgateway";
+            this.tb_localgateway.Size = new System.Drawing.Size(139, 21);
+            this.tb_localgateway.TabIndex = 4;
+            this.tb_localgateway.Text = "192.168.6.254";
             // 
             // lbl_localgateway
             // 
@@ -124,22 +125,34 @@
             this.tb_excuteip.TabIndex = 8;
             this.tb_excuteip.Text = "45.119.126.225";
             // 
+            // tb_setserverdefault
+            // 
+            this.tb_setserverdefault.Location = new System.Drawing.Point(138, 90);
+            this.tb_setserverdefault.Name = "tb_setserverdefault";
+            this.tb_setserverdefault.Size = new System.Drawing.Size(132, 23);
+            this.tb_setserverdefault.TabIndex = 10;
+            this.tb_setserverdefault.Text = "设置外围网关为默认";
+            this.tb_setserverdefault.UseVisualStyleBackColor = true;
+            this.tb_setserverdefault.Click += new System.EventHandler(this.tb_setserverdefault_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(478, 136);
+            this.Controls.Add(this.tb_setserverdefault);
             this.Controls.Add(this.lbl_excuteip);
             this.Controls.Add(this.tb_excuteip);
             this.Controls.Add(this.cb_servergateway);
             this.Controls.Add(this.tb_serverip);
             this.Controls.Add(this.lbl_localgateway);
-            this.Controls.Add(this.cb_localgateway);
+            this.Controls.Add(this.tb_localgateway);
             this.Controls.Add(this.cb_autoadd);
             this.Controls.Add(this.btn_switch);
             this.Controls.Add(this.cb_autochange);
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -149,12 +162,13 @@
         private System.Windows.Forms.CheckBox cb_autochange;
         private System.Windows.Forms.Button btn_switch;
         private System.Windows.Forms.CheckBox cb_autoadd;
-        private System.Windows.Forms.TextBox cb_localgateway;
+        private System.Windows.Forms.TextBox tb_localgateway;
         private System.Windows.Forms.Label lbl_localgateway;
         private System.Windows.Forms.Label cb_servergateway;
         private System.Windows.Forms.TextBox tb_serverip;
         private System.Windows.Forms.Label lbl_excuteip;
         private System.Windows.Forms.TextBox tb_excuteip;
+        private System.Windows.Forms.Button tb_setserverdefault;
     }
 }
 
