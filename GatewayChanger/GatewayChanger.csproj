@@ -104,6 +104,7 @@
     <Content Include="SHARPCAP\Release\SharpPcap.dll" />
     <Content Include="SHARPCAP\Release\SharpPcap.xml" />
     <Content Include="SHARPCAP\WinPcap_4_1_3.exe" />
+    <Content Include="Test.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

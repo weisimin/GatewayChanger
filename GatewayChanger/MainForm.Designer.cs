@@ -38,13 +38,12 @@
             this.lbl_excuteip = new System.Windows.Forms.Label();
             this.tb_excuteip = new System.Windows.Forms.TextBox();
             this.tb_setserverdefault = new System.Windows.Forms.Button();
+            this.btn_importchina = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cb_autochange
             // 
             this.cb_autochange.AutoSize = true;
-            this.cb_autochange.Checked = true;
-            this.cb_autochange.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cb_autochange.Location = new System.Drawing.Point(30, 12);
             this.cb_autochange.Name = "cb_autochange";
             this.cb_autochange.Size = new System.Drawing.Size(132, 16);
@@ -55,6 +54,7 @@
             // 
             // btn_switch
             // 
+            this.btn_switch.Enabled = false;
             this.btn_switch.Location = new System.Drawing.Point(29, 90);
             this.btn_switch.Name = "btn_switch";
             this.btn_switch.Size = new System.Drawing.Size(75, 23);
@@ -127,6 +127,7 @@
             // 
             // tb_setserverdefault
             // 
+            this.tb_setserverdefault.Enabled = false;
             this.tb_setserverdefault.Location = new System.Drawing.Point(138, 90);
             this.tb_setserverdefault.Name = "tb_setserverdefault";
             this.tb_setserverdefault.Size = new System.Drawing.Size(132, 23);
@@ -135,11 +136,22 @@
             this.tb_setserverdefault.UseVisualStyleBackColor = true;
             this.tb_setserverdefault.Click += new System.EventHandler(this.tb_setserverdefault_Click);
             // 
+            // btn_importchina
+            // 
+            this.btn_importchina.Location = new System.Drawing.Point(30, 149);
+            this.btn_importchina.Name = "btn_importchina";
+            this.btn_importchina.Size = new System.Drawing.Size(75, 23);
+            this.btn_importchina.TabIndex = 11;
+            this.btn_importchina.Text = "导入中国IP";
+            this.btn_importchina.UseVisualStyleBackColor = true;
+            this.btn_importchina.Click += new System.EventHandler(this.btn_importchina_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(478, 136);
+            this.ClientSize = new System.Drawing.Size(478, 215);
+            this.Controls.Add(this.btn_importchina);
             this.Controls.Add(this.tb_setserverdefault);
             this.Controls.Add(this.lbl_excuteip);
             this.Controls.Add(this.tb_excuteip);
@@ -169,6 +181,7 @@
         private System.Windows.Forms.Label lbl_excuteip;
         private System.Windows.Forms.TextBox tb_excuteip;
         private System.Windows.Forms.Button tb_setserverdefault;
+        private System.Windows.Forms.Button btn_importchina;
     }
 }
 

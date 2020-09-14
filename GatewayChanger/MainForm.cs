@@ -13,6 +13,7 @@ using PacketDotNet;
 using SharpPcap.LibPcap;
 using System.Threading;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace GatewayChanger
 {
@@ -70,7 +71,7 @@ namespace GatewayChanger
         {
             autoadd = cb_autoadd.Checked;
         }
-        bool autochange = true;
+        bool autochange = false;
         private void cb_autochange_CheckedChanged(object sender, EventArgs e)
         {
             autochange = cb_autochange.Checked;
@@ -99,21 +100,21 @@ namespace GatewayChanger
             if (internetPacket != null)
             {
 
-               // NetFramework.Console.Write("InternetPacket包" + Encoding.ASCII.GetString(((InternetPacket)internetPacket).Header));
+                NetFramework.Console.Write("InternetPacket包" + Encoding.ASCII.GetString(((InternetPacket)internetPacket).Header));
 
             }
             //var pppoePacket = PacketDotNet.PPPoEPacket.Parse(packet.BytesHighPerformance.Bytes); 
             var arpPacket = packet.Extract(typeof(ARPPacket));//ip包  
             if (arpPacket != null)
             {
-               // NetFramework.Console.Write("arpPacket：" + ((ARPPacket)arpPacket).SenderProtocolAddress.ToString());
-               
+                // NetFramework.Console.Write("arpPacket：" + ((ARPPacket)arpPacket).SenderProtocolAddress.ToString());
+
             }
 
             var ipPacket = packet.Extract(typeof(IpPacket));//ip包  
-            if (ipPacket != null)
+            if (ipPacket != null && false)
             {
-                 
+
                 String FromAddress = ((IpPacket)ipPacket).SourceAddress.ToString();
                 String ToAddress = ((IpPacket)ipPacket).DestinationAddress.ToString();
                 String Message = "源地址" + ((IpPacket)ipPacket).SourceAddress.ToString()
@@ -153,37 +154,37 @@ namespace GatewayChanger
                         }
                     }//符合条件的
                 }
-                    #endregion
-                    #region 添加到本地
-                    if (autoadd == true)
+                #endregion
+                #region 添加到本地
+                if (autoadd == true)
+                {
+                    if (ToAddress.Contains("."))
                     {
-                        if (ToAddress.Contains("."))
+                        if (RouteTable.ContainsKey(ToAddress) == false)
                         {
-                            if (RouteTable.ContainsKey(ToAddress) == false)
-                            {
-                                NetFramework.Console.Write("添加到路由" + ToAddress);
-                                String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_localgateway.Text + " ";
-                                NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
-                                RouteTable.Add(ToAddress, "run");
-                            }
+                            NetFramework.Console.Write("添加到路由" + ToAddress);
+                            String CMDParammter = "ADD " + ToAddress + " MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+                            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+                            RouteTable.Add(ToAddress, "run");
                         }
-
-
-
                     }
-                    #endregion
-                
+
+
+
+                }
+                #endregion
+
             }
 
             var udpPacket = packet.Extract(typeof(UdpPacket));//ip包
-            if (udpPacket != null)
+            if (udpPacket != null && false)
             {
 
                 //((UdpPacket)udpPacket).
                 //NetFramework.Console.Write("TCP:" + Encoding.ASCII.GetString(((UdpPacket)udpPacket).Header));
             }
             var tcpPacket = packet.Extract(typeof(TcpPacket));//ip包  
-            if (tcpPacket != null)
+            if (tcpPacket != null && false)
             {
                 //((TcpPacket)tcpPacket).HO
                 //NetFramework.Console.Write("UDP:" + Encoding.ASCII.GetString(((TcpPacket)tcpPacket).Header));
@@ -223,6 +224,50 @@ namespace GatewayChanger
         {
             String CMDParammter = "ADD 0.0.0.0 MASK 0.0.0.0 " + tb_serverip.Text + " ";
             NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+        }
+
+        private void btn_importchina_Click(object sender, EventArgs e)
+        {
+
+            //添加特殊 DNS为 VPNIP
+            String CMDParammter = "ADD 8.8.8.8 MASK 255.255.255.255 " + tb_serverip.Text + " ";
+            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+
+
+            //添加未DNS转换的 内网网关
+            CMDParammter = "ADD " + tb_excuteip.Text + " MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+
+            CMDParammter = "ADD 114.114.114.114 MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+
+            CMDParammter = "ADD 202.96.128.86 MASK 255.255.255.255 " + tb_localgateway.Text + " ";
+            NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+            //添加中国IP为 内网网关
+
+            //改变默认网关为 VPN IP
+
+
+
+            //String CMDParammter = "ADD 8.8.8.8 MASK 255.255.255.255 " + tb_serverip.Text + " ";
+            //NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+            //CMDParammter = "ADD 114.114.114.114 MASK 255.255.255.255 " + tb_serverip.Text + " ";
+            //NetFramework.Util_CMD.RunHideCmd("route", CMDParammter);
+
+            CookieCollection cc = new CookieCollection();
+            String Url = "http://ip.bczs.net/country/CN";
+            String html = NetFramework.Util_WEB.OpenUrl(Url, "", "", "GET", cc);
+            Regex find = new Regex("<div class=\"well((?!</div>)[\\s\\S])+</div>", RegexOptions.IgnoreCase);
+            string Res = find.Match(html).Value;
+            Res = Regex.Replace(Res, "<thead>((?</thead>)[\\s\\S])+</thead>", "");
+            DataTable das = NetFramework.Util_XLS.ExportHtmlTableToDataTable(Res, false);
+            foreach (DataRow item in das.Rows)
+            {
+                String FromIP = item[0] == null ? "" : item[0].ToString();
+                String ToIP = item[1] == null ? "" : item[0].ToString();
+            }
+            //route print interface
+
         }
     }
     public class WinCapHelper
@@ -274,6 +319,7 @@ namespace GatewayChanger
                     device.OnPacketArrival += new PacketArrivalEventHandler(device_OnPacketArrival);
                     device.Open(DeviceMode.Normal, 1000);
                     device.Capture(500);
+
                     //device.StartCapture();  
                 }
             }));
@@ -304,4 +350,5 @@ namespace GatewayChanger
     }
 
     //https://www.ip.cn/api/index?ip=45.119.126.225&type=1
+    //http://ip.bczs.net/country/CN
 }
